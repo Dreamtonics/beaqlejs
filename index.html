@@ -28,11 +28,32 @@
     <script type="text/javascript">
     /* <![CDATA[ */
         var testHandle;
+        const classes = {
+            MushraTest,
+            AbxTest,
+            PrefTest,
+        };
+        class DynamicClass {
+            constructor (className, opts) {
+                return new classes[className](opts);
+            }
+        }
         window.onload=function() {
+            var url = new URL(window.location.href);
+            var ListeningTestID = url.searchParams.get("id");
+
+            fetch('/api/listeningtest/config/'+ListeningTestID, {
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(function(conf) {
+                testHandle = new DynamicClass(conf['TestType'], conf)
+            })
+            .catch(error => {console.log(error); alert('Invalid Test.')})
 
             // Uncomment one of the following lines to choose the desired test class
 
-            testHandle = new MushraTest(TestConfig);    // <-- MUSHRA test class
+            // testHandle = new MushraTest(TestConfig);    // <-- MUSHRA test class
             //testHandle = new AbxTest(TestConfig);     // <-- ABX test class
 
             $('#Footer').prepend(testHandle.browserFeatureString() + '<br/>');
@@ -109,7 +130,7 @@
             <table border=0 style="margin-left: auto;margin-right: auto;">
             <tr><td>Name:</td><td><input id="UserName" type="text" size="40" maxlength="40" /></td></tr>
             <tr><td>Email:</td><td><input id="UserEMail" type="text" size="40" maxlength="40" /></td></tr>
-            <tr><td></td><td><textarea id="UserComment" cols="40" rows="4">Your comment...</textarea></td></tr>
+            <tr><td></td><td><textarea id="UserComment" cols="40" rows="4"></textarea></td></tr>
             </table>
             <br />
             <button id="BtnSubmitData" class="submitOnline" onclick="testHandle.SubmitTestResults();">Submit</button>

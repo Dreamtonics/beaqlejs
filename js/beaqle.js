@@ -825,15 +825,17 @@ $.extend({ alert: function (message, title) {
     // submit test results to server
     ListeningTest.prototype.SubmitTestResults = function () {
 
+        var testHandle = this;
         var UserObj = new Object();
         UserObj.UserName = $('#UserName').val();
         UserObj.UserEmail = $('#UserEMail').val();
         UserObj.UserComment = $('#UserComment').val();
+        UserObj.ListeningTestID = testHandle.TestConfig.ListeningTestID;
 
-        var EvalResults = this.TestState.EvalResults;        
-        EvalResults.push(UserObj)
+        var EvalResults = new Object();
+        EvalResults.MetaData = UserObj;
+        EvalResults.TestResult = this.TestState.EvalResults;
         
-        var testHandle = this;
         $.ajax({
                     type: "POST",
                     timeout: 5000,
