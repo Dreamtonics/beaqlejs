@@ -380,6 +380,12 @@ function shuffleArray(array) {
     return array;
 }
 
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //不含最大值，含最小值
+}
+
 // jQuery UI based alert() dialog replacement
 $.extend({ alert: function (message, title) {
   $("<div></div>").dialog( {
@@ -550,6 +556,13 @@ $.extend({ alert: function (message, title) {
         // shorten and/or shuffle the sequence
         if ((this.TestConfig.MaxTestsPerRun > 0) && (this.TestConfig.MaxTestsPerRun < this.TestConfig.Testsets.length)) {
             this.TestConfig.RandomizeTestOrder = true;
+            if (this.TestConfig.Testsets.length > this.TestConfig.MaxTestsPerRun*2){
+                step = this.TestConfig.Testsets.length / this.TestConfig.MaxTestsPerRun
+                this.TestState.TestSequence = Array();
+                for (var i = 0; i < this.TestConfig.MaxTestsPerRun; i++){
+                    this.TestState.TestSequence[i] = getRandomInt(i * step, Math.min((i+1) * step, this.TestConfig.Testsets.length));
+                }
+            }
             this.TestState.TestSequence = shuffleArray(this.TestState.TestSequence);
             this.TestState.TestSequence = this.TestState.TestSequence.slice(0, this.TestConfig.MaxTestsPerRun);
         } else if (this.TestConfig.RandomizeTestOrder == true) {
