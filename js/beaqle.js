@@ -557,7 +557,7 @@ $.extend({ alert: function (message, title) {
         if ((this.TestConfig.MaxTestsPerRun > 0) && (this.TestConfig.MaxTestsPerRun < this.TestConfig.Testsets.length)) {
             this.TestConfig.RandomizeTestOrder = true;
             if (this.TestConfig.Testsets.length > this.TestConfig.MaxTestsPerRun*2){
-                step = this.TestConfig.Testsets.length / this.TestConfig.MaxTestsPerRun
+                var step = this.TestConfig.Testsets.length / this.TestConfig.MaxTestsPerRun;
                 this.TestState.TestSequence = Array();
                 for (var i = 0; i < this.TestConfig.MaxTestsPerRun; i++){
                     this.TestState.TestSequence[i] = getRandomInt(i * step, Math.min((i+1) * step, this.TestConfig.Testsets.length));
