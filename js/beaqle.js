@@ -1198,6 +1198,8 @@ MushraTest.prototype.formatResults = function () {
             });
             
             resultstring += tab.outerHTML + "\n";
+            
+            eval_i++;
         }
     }
    
@@ -1565,6 +1567,8 @@ AbxTest.prototype.formatResults = function () {
                 cell.innerHTML = "wrong"; 
                 numWrong += 1;
             }
+            
+            eval_i++;
         }
     }
 
@@ -1714,6 +1718,8 @@ PrefTest.prototype.formatResults = function () {
             cell = row.insertCell(-1);
             this.TestState.EvalResults[eval_i].Preference = this.TestState.Ratings[i];
             cell.innerHTML = this.TestState.EvalResults[eval_i].Preference;
+
+            eval_i++;
         }
     }
     resultstring += tab.outerHTML;
@@ -1928,6 +1934,8 @@ MOSTest.prototype.formatResults = function () {
             });
             
             resultstring += tab.outerHTML + "\n";
+            
+            eval_i++;
         }
     }
    
