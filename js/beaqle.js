@@ -1160,15 +1160,15 @@ MushraTest.prototype.formatResults = function () {
     var numCorrect = 0;
     var numWrong   = 0;
 
+    var eval_i = 0;
     // evaluate single tests
     for (var i = 0; i < this.TestConfig.Testsets.length; i++) {  
-        this.TestState.EvalResults[i]           = new Object();
-        this.TestState.EvalResults[i].TestID    = this.TestConfig.Testsets[i].TestID;
-
         if (this.TestState.TestSequence.indexOf(i)>=0) {
-            this.TestState.EvalResults[i].Runtime   = this.TestState.Runtime[i];
-            this.TestState.EvalResults[i].rating    = new Object();
-            this.TestState.EvalResults[i].filename  = new Object();
+            this.TestState.EvalResults[eval_i]           = new Object();
+            this.TestState.EvalResults[eval_i].TestID    = this.TestConfig.Testsets[i].TestID;
+            this.TestState.EvalResults[eval_i].Runtime   = this.TestState.Runtime[i];
+            this.TestState.EvalResults[eval_i].rating    = new Object();
+            this.TestState.EvalResults[eval_i].filename  = new Object();
 
             resultstring += "<p><b>"+this.TestConfig.Testsets[i].Name + "</b> ("+this.TestConfig.Testsets[i].TestID+"), Runtime:" + this.TestState.Runtime[i]/1000 + "sec </p>\n";
 
@@ -1183,7 +1183,7 @@ MushraTest.prototype.formatResults = function () {
             cell.innerHTML = "Rating";
 
             var fileArr    = this.TestConfig.Testsets[i].Files;
-            var testResult = this.TestState.EvalResults[i];
+            var testResult = this.TestState.EvalResults[eval_i];
 
 
             $.each(this.TestState.Ratings[i], function(fileID, rating) { 
@@ -1375,15 +1375,15 @@ MushraTestWORef.prototype.formatResults = function () {
     var numCorrect = 0;
     var numWrong   = 0;
 
+    var eval_i = 0;
     // evaluate single tests
     for (var i = 0; i < this.TestConfig.Testsets.length; i++) {  
-        this.TestState.EvalResults[i]           = new Object();
-        this.TestState.EvalResults[i].TestID    = this.TestConfig.Testsets[i].TestID;
-
         if (this.TestState.TestSequence.indexOf(i)>=0) {
-            this.TestState.EvalResults[i].Runtime   = this.TestState.Runtime[i];
-            this.TestState.EvalResults[i].rating    = new Object();
-            this.TestState.EvalResults[i].filename  = new Object();
+            this.TestState.EvalResults[eval_i]           = new Object();
+            this.TestState.EvalResults[eval_i].TestID    = this.TestConfig.Testsets[i].TestID;
+            this.TestState.EvalResults[eval_i].Runtime   = this.TestState.Runtime[i];
+            this.TestState.EvalResults[eval_i].rating    = new Object();
+            this.TestState.EvalResults[eval_i].filename  = new Object();
 
             resultstring += "<p><b>"+this.TestConfig.Testsets[i].Name + "</b> ("+this.TestConfig.Testsets[i].TestID+"), Runtime:" + this.TestState.Runtime[i]/1000 + "sec </p>\n";
 
@@ -1398,7 +1398,7 @@ MushraTestWORef.prototype.formatResults = function () {
             cell.innerHTML = "Rating";
 
             var fileArr    = this.TestConfig.Testsets[i].Files;
-            var testResult = this.TestState.EvalResults[i];
+            var testResult = this.TestState.EvalResults[eval_i];
 
 
             $.each(this.TestState.Ratings[i], function(fileID, rating) { 
@@ -1413,6 +1413,8 @@ MushraTestWORef.prototype.formatResults = function () {
             });
             
             resultstring += tab.outerHTML + "\n";
+
+            eval_i++;
         }
     }
    
@@ -1540,12 +1542,13 @@ AbxTest.prototype.formatResults = function () {
     var numCorrect = 0;
     var numWrong   = 0;
 
+    var eval_i = 0;
     // evaluate single tests
     for (var i = 0; i < this.TestConfig.Testsets.length; i++) {
-        this.TestState.EvalResults[i]        = new Object();
-        this.TestState.EvalResults[i].TestID = this.TestConfig.Testsets[i].TestID;
-
         if (this.TestState.TestSequence.indexOf(i)>=0) {
+            this.TestState.EvalResults[eval_i]        = new Object();
+            this.TestState.EvalResults[eval_i].TestID = this.TestConfig.Testsets[i].TestID;
+
             row  = tab.insertRow(-1);
 
             cell = row.insertCell(-1);
@@ -1554,11 +1557,11 @@ AbxTest.prototype.formatResults = function () {
 
 
             if (this.TestState.Ratings[i] === this.TestState.FileMappings[i].X) {
-                this.TestState.EvalResults[i] = true;
+                this.TestState.EvalResults[eval_i] = true;
                 cell.innerHTML = "correct"; 
                 numCorrect += 1;
             } else {
-                this.TestState.EvalResults[i] = false;
+                this.TestState.EvalResults[eval_i] = false;
                 cell.innerHTML = "wrong"; 
                 numWrong += 1;
             }
@@ -1692,23 +1695,25 @@ PrefTest.prototype.formatResults = function () {
     var numCorrect = 0;
     var numWrong   = 0;
 
+    var eval_i = 0;
     // evaluate single tests
     for (var i = 0; i < this.TestConfig.Testsets.length; i++) {
-        this.TestState.EvalResults[i] = new Object();
-        this.TestState.EvalResults[i].TestID = this.TestConfig.Testsets[i].TestID;
         if (this.TestState.TestSequence.indexOf(i)>=0) {
+            this.TestState.EvalResults[eval_i] = new Object();
+            this.TestState.EvalResults[eval_i].TestID = this.TestConfig.Testsets[i].TestID;
+
             row  = tab.insertRow(-1);
             cell = row.insertCell(-1);
             cell.innerHTML = this.TestConfig.Testsets[i].Name + "("+this.TestConfig.Testsets[i].TestID+")";
             cell = row.insertCell(-1);
-            this.TestState.EvalResults[i].PresentationOrder = "A=" + this.TestState.FileMappings[i].A + ", B=" + this.TestState.FileMappings[i].B;
-            cell.innerHTML = this.TestState.EvalResults[i].PresentationOrder;
+            this.TestState.EvalResults[eval_i].PresentationOrder = "A=" + this.TestState.FileMappings[i].A + ", B=" + this.TestState.FileMappings[i].B;
+            cell.innerHTML = this.TestState.EvalResults[eval_i].PresentationOrder;
             cell = row.insertCell(-1);
-            this.TestState.EvalResults[i].Runtime   = this.TestState.Runtime[i];
-            cell.innerHTML = this.TestState.EvalResults[i].Runtime; 
+            this.TestState.EvalResults[eval_i].Runtime   = this.TestState.Runtime[i];
+            cell.innerHTML = this.TestState.EvalResults[eval_i].Runtime; 
             cell = row.insertCell(-1);
-            this.TestState.EvalResults[i].Preference = this.TestState.Ratings[i];
-            cell.innerHTML = this.TestState.EvalResults[i].Preference;
+            this.TestState.EvalResults[eval_i].Preference = this.TestState.Ratings[i];
+            cell.innerHTML = this.TestState.EvalResults[eval_i].Preference;
         }
     }
     resultstring += tab.outerHTML;
@@ -1886,14 +1891,15 @@ MOSTest.prototype.formatResults = function () {
     var numCorrect = 0;
     var numWrong   = 0;
 
+    var eval_i = 0;
     // evaluate single tests
     for (var i = 0; i < this.TestConfig.Testsets.length; i++) {  
-        this.TestState.EvalResults[i]           = new Object();
-        this.TestState.EvalResults[i].TestID    = this.TestConfig.Testsets[i].TestID;
-
         if (this.TestState.TestSequence.indexOf(i)>=0) {
-            this.TestState.EvalResults[i].Runtime   = this.TestState.Runtime[i];
-            this.TestState.EvalResults[i].rating    = new Object();
+            this.TestState.EvalResults[eval_i]           = new Object();
+            this.TestState.EvalResults[eval_i].TestID    = this.TestConfig.Testsets[i].TestID;
+
+            this.TestState.EvalResults[eval_i].Runtime   = this.TestState.Runtime[i];
+            this.TestState.EvalResults[eval_i].rating    = new Object();
 
             resultstring += "<p><b>"+this.TestConfig.Testsets[i].Name + "</b> ("+this.TestConfig.Testsets[i].TestID+"), Runtime:" + this.TestState.Runtime[i]/1000 + "sec </p>\n";
 
@@ -1908,7 +1914,7 @@ MOSTest.prototype.formatResults = function () {
             cell.innerHTML = "Rating";
 
             var fileArr    = this.TestConfig.Testsets[i].Files;
-            var testResult = this.TestState.EvalResults[i];
+            var testResult = this.TestState.EvalResults[eval_i];
 
 
             $.each(this.TestState.Ratings[i], function(fileID, rating) { 
