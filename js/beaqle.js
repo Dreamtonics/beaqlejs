@@ -544,7 +544,13 @@ $.extend({ alert: function (message, title) {
     
     // ###################################################################
     ListeningTest.prototype.startTests = function() {
-        
+        if ($('#ProlificID').val() == "") {
+            alert("You must enter a Prolific ID to participate in this test.")
+            return;
+        } else {
+            $('#UserName').val($('#ProlificID').val());
+        }
+
         // init audio pool after user started the tests
         this.initAudio();
         
@@ -843,6 +849,11 @@ $.extend({ alert: function (message, title) {
         UserObj.UserName = $('#UserName').val();
         UserObj.UserEmail = $('#UserEMail').val();
         UserObj.UserComment = $('#UserComment').val();
+
+        if ($('#ProlificID').val() != "N/A") {
+            UserObj.UserName = $('#ProlificID').val();
+        }
+
         UserObj.ListeningTestID = testHandle.TestConfig.ListeningTestID;
 
         var EvalResults = new Object();
@@ -1935,6 +1946,239 @@ MOSTest.prototype.formatResults = function () {
             
             resultstring += tab.outerHTML + "\n";
             
+            eval_i++;
+        }
+    }
+   
+    return resultstring;
+}
+
+// ###################################################################
+// Comparative MOS test with dual objective main object
+
+// inherit from ListeningTest
+function DualObjectiveCMOS(TestData) {
+    ListeningTest.apply(this, arguments);
+}
+DualObjectiveCMOS.prototype = new ListeningTest();
+DualObjectiveCMOS.prototype.constructor = DualObjectiveCMOS;
+
+
+// implement specific code
+
+
+// ###################################################################
+// create random mapping to test files
+DualObjectiveCMOS.prototype.createFileMapping = function (TestIdx) {
+    var NumFiles = $.map(this.TestConfig.Testsets[TestIdx].Files, function(n, i) { return i; }).length;
+    var fileMapping = new Array(NumFiles);    
+
+    $.each(this.TestConfig.Testsets[TestIdx].Files, function(index, value) { 
+
+        do {
+            var RandFileNumber = Math.floor(Math.random()*(NumFiles));
+            if (RandFileNumber>NumFiles-1) RandFileNumber = NumFiles-1;
+        } while (typeof fileMapping[RandFileNumber] !== 'undefined');
+
+        if (RandFileNumber<0) alert(fileMapping);
+        fileMapping[RandFileNumber] = index;
+    });
+    
+    this.TestState.FileMappings[TestIdx] = fileMapping;
+}
+
+// ###################################################################
+// read ratings from TestState object
+DualObjectiveCMOS.prototype.readRatings = function (TestIdx) {
+    
+    if ((TestIdx in this.TestState.Ratings)==false) return false;
+    
+    var testObject = this;
+    $(".rateSlider").each( function() {
+        var id = $(this).attr('id');
+        var pos = id.lastIndexOf('slider');
+        var fileNum = id.substring(pos+6, id.length);
+        
+        if (id.substring(0, 3) == "nat") {
+            $(this).slider('value', testObject.TestState.Ratings[TestIdx][fileNum][0]);
+        } else {
+            $(this).slider('value', testObject.TestState.Ratings[TestIdx][fileNum][1]);
+        }
+        $(this).slider('refresh');
+    });
+
+}
+
+// ###################################################################
+// save ratings to TestState object
+DualObjectiveCMOS.prototype.saveRatings = function (TestIdx) {
+    var ratings = new Object();
+    $(".rateSlider").each( function() {
+        var id = $(this).attr('id');
+        var pos = id.lastIndexOf('slider');
+        var fileNum = id.substring(pos+6, id.length);
+        
+        if ((fileNum in ratings)==false) {
+            ratings[fileNum] = [0, 0];
+        }
+        if(id.substring(0, 3) == "nat") {
+            ratings[fileNum][0] = $(this).slider( "option", "value" );
+        } else {
+            ratings[fileNum][1] = $(this).slider( "option", "value" );
+        }
+    });
+
+    this.TestState.Ratings[TestIdx] = ratings;
+    return true;
+}
+
+DualObjectiveCMOS.prototype.createTestDOM = function (TestIdx) {
+
+        // clear old test table
+        if ($('#TableContainer > table')) {
+            $('#TableContainer > table').remove();
+        }
+
+        // create random file mapping if not yet done
+        if (!this.TestState.FileMappings[TestIdx]) {
+                this.createFileMapping(TestIdx);
+        }
+
+        // create new test table
+        var tab = document.createElement('table');
+        tab.setAttribute('id','TestTable');
+            
+        var fileID = "";
+        var row = new Array();
+        var cell = new Array();
+            
+        // add reference
+        fileID = "Reference";
+        row  = tab.insertRow(-1);
+        cell[0] = row.insertCell(-1);
+        cell[1] = row.insertCell(-1);
+        cell[2] = row.insertCell(-1);
+        cell[3] = row.insertCell(-1);
+        cell[3].innerHTML = "Naturalness";
+        cell[4] = row.insertCell(-1);
+        cell[4].innerHTML = "Preference";
+
+        row  = tab.insertRow(-1);
+        cell[0] = row.insertCell(-1);
+        cell[1] = row.insertCell(-1);
+        cell[2] = row.insertCell(-1);
+        cell[3] = row.insertCell(-1);
+        cell[3].innerHTML = "<img id='ScaleImage' src='"+this.TestConfig.RateScalePng+"'/>";
+        cell[4] = row.insertCell(-1);
+        cell[4].innerHTML = "<img id='ScaleImage' src='"+this.TestConfig.RateScalePng+"'/>";
+        
+        // this.addAudio(TestIdx, fileID, fileID);
+            
+        // add spacing
+        row = tab.insertRow(-1);
+        row.setAttribute("height","5"); 
+
+        var rateMin = this.TestConfig.RateMinValue;
+        var rateMax = this.TestConfig.RateMaxValue;
+            
+        // add test items
+        for (var i = 0; i < this.TestState.FileMappings[TestIdx].length; i++) { 
+            
+            var fileID = this.TestState.FileMappings[TestIdx][i];
+            var relID  = "";
+            if (fileID === "Reference")
+                relID = "HiddenRef";
+            else
+                relID = fileID;
+
+            row[i]  = tab.insertRow(-1);
+            cell[0] = row[i].insertCell(-1);
+            cell[0].innerHTML = "<span class='testItem'>Test Item "+ (i+1)+"</span>";
+            cell[1] = row[i].insertCell(-1);
+            cell[1].innerHTML =  '<button id="play'+relID+'Btn" class="playButton" rel="'+relID+'">Play</button>';
+            cell[2] = row[i].insertCell(-1);
+            cell[2].innerHTML = "<button class='stopButton'>Stop</button>";  
+            cell[3] = row[i].insertCell(-1);
+            var fileIDstr = "";
+            if (this.TestConfig.ShowFileIDs) {
+                    fileIDstr = fileID;
+            }
+            cell[3].innerHTML = "<div class='rateSlider' id='natslider"+fileID+"' rel='"+relID+"'>"+fileIDstr+"</div>";
+            cell[4] = row[i].insertCell(-1);
+            var fileIDstr = "";
+            if (this.TestConfig.ShowFileIDs) {
+                    fileIDstr = fileID;
+            }
+            cell[4].innerHTML = "<div class='rateSlider' id='prefslider"+fileID+"' rel='"+relID+"'>"+fileIDstr+"</div>";
+
+            this.addAudio(TestIdx, fileID, relID);
+
+        }        
+
+        // append the created table to the DOM
+        $('#TableContainer').append(tab);
+
+        var mushraConf = this.TestConfig;
+        $('.rateSlider').each( function() {
+            $(this).slider({
+                    value: mushraConf.RateDefaultValue,
+                    min: mushraConf.RateMinValue,
+                    max: mushraConf.RateMaxValue,
+                    animate: false,
+                    orientation: "horizontal"
+            });
+            $(this).css('background-image', 'url('+mushraConf.RateScaleBgPng+')');
+        });
+
+}
+
+DualObjectiveCMOS.prototype.formatResults = function () {
+
+    var resultstring = "";
+
+
+    var numCorrect = 0;
+    var numWrong   = 0;
+
+    var eval_i = 0;
+    // evaluate single tests
+    for (var i = 0; i < this.TestConfig.Testsets.length; i++) {  
+        if (this.TestState.TestSequence.indexOf(i)>=0) {
+            this.TestState.EvalResults[eval_i]           = new Object();
+            this.TestState.EvalResults[eval_i].TestID    = this.TestConfig.Testsets[i].TestID;
+            this.TestState.EvalResults[eval_i].Runtime   = this.TestState.Runtime[i];
+            this.TestState.EvalResults[eval_i].rating    = new Object();
+            this.TestState.EvalResults[eval_i].filename  = new Object();
+
+            resultstring += "<p><b>"+this.TestConfig.Testsets[i].Name + "</b> ("+this.TestConfig.Testsets[i].TestID+"), Runtime:" + this.TestState.Runtime[i]/1000 + "sec </p>\n";
+
+            var tab = document.createElement('table');
+            var row;
+            var cell;
+
+            row  = tab.insertRow(-1);
+            cell = row.insertCell(-1);
+            cell.innerHTML = "Filename";
+            cell = row.insertCell(-1);
+            cell.innerHTML = "Rating";
+
+            var fileArr    = this.TestConfig.Testsets[i].Files;
+            var testResult = this.TestState.EvalResults[eval_i];
+
+
+            $.each(this.TestState.Ratings[i], function(fileID, rating) { 
+                row  = tab.insertRow(-1);
+                cell = row.insertCell(-1);
+                cell.innerHTML = fileArr[fileID];
+                cell = row.insertCell(-1);
+                cell.innerHTML = rating[0] + "," + rating[1];
+
+                testResult.rating[fileID]   = rating;
+                testResult.filename[fileID] = fileArr[fileID];
+            });
+            
+            resultstring += tab.outerHTML + "\n";
+
             eval_i++;
         }
     }

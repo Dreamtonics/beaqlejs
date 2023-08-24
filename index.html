@@ -34,6 +34,7 @@
             PrefTest,
             MOSTest,
             MushraTestWORef,
+            DualObjectiveCMOS,
         };
         class DynamicClass {
             constructor (className, opts) {
@@ -44,6 +45,17 @@
             var url = new URL(window.location.href);
             var ListeningTestID = url.searchParams.get("id");
 
+            var username = url.searchParams.get("username");
+            var isFromProlific = url.searchParams.get("prolific");
+            if (username) {
+                $('#UserName').val(username);
+            }
+            if (isFromProlific == "1") {
+                $('#ProlificFields').css('display', 'inline');
+            } else {
+                $('#ProlificID').val('N/A');
+            }
+
             fetch('/api/listeningtest/config/'+ListeningTestID, {
                 credentials: 'include'
             })
@@ -53,6 +65,9 @@
                 var TestIntroductionHTML = conf['TestIntroductionHTML'];
                 if (TestIntroductionHTML){
                     $('#TestIntroductionHTML').html(TestIntroductionHTML);
+                }
+                if (conf['TestType'] == "DualObjectiveCMOS") {
+                    $('#Wrapper').css('width', 1150);
                 }
             })
             .catch(error => {console.log(error); alert('Invalid Test.')})
@@ -104,9 +119,17 @@
             <br />
             <br />
         </div>
-                        
+        
+        <div>
+            <div id="ProlificFields" style="display: none; padding-right: 1em;">
+                Prolific ID: <input id="ProlificID" type="text" size="40" maxlength="40" />
+            </div>
+            <div style="display: inline">
+                <button id="BtnStartTest" onclick="testHandle.startTests();">Start!</button>
+            </div>
+        </div>
+
         <!-- this button starts the first test -->
-        <button id="BtnStartTest" onclick="testHandle.startTests();">Start!</button>	
     </div>
 
     <!-- final text after all tests have passed -->
