@@ -22,7 +22,7 @@
 
     <script src="js/jquery.js" type="text/javascript"></script>
     <script src="js/jquery-ui.custom.min.js" type="text/javascript" ></script>
-    <script src="js/beaqle.js?v=10" type="text/javascript"></script>
+    <script src="js/beaqle.js?v=20" type="text/javascript"></script>
 
 
     <script type="text/javascript">
@@ -69,6 +69,7 @@
                 if (conf['TestType'] == "DualObjectiveCMOS") {
                     $('#Wrapper').css('width', 1150);
                 }
+                $('#Footer').prepend(testHandle.browserFeatureString() + '<br/>');
             })
             .catch(error => {console.log(error); alert('Invalid Test.')})
 
@@ -77,7 +78,6 @@
             // testHandle = new MushraTest(TestConfig);    // <-- MUSHRA test class
             //testHandle = new AbxTest(TestConfig);     // <-- ABX test class
 
-            $('#Footer').prepend(testHandle.browserFeatureString() + '<br/>');
         };
     /* ]]> */
     </script>
@@ -110,9 +110,8 @@
                 <br />
                 Instructions:
                 <ul>
-                    <li>Most important: use high quality studio headphones and a good soundcard!</li>
+                    <li>Most important: use high quality headphones and a good soundcard!</li>
                     <li>Listen through all test files and test sets before you do any ratings to get used to the material.</li>
-                    <li>Rate the quality of the test items only compared to the reference on top.</li>
                     <li>Try to rate the overall impression of a test item and don't concentrate on single aspects. </li>
                 </ul>
             </div>
