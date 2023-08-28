@@ -430,6 +430,7 @@ $.extend({ alert: function (message, title) {
             "TestIsRunning": 0,		// is true if test is running, false when finished or not yet started
             "FileMappings": [],		// json array with random file mappings
             "Ratings": [],			// json array with ratings
+            "Comments": [],
             "EvalResults": [],      // json array to store the evaluated test results
             "AudiosInLoadQueue": -1,
             "AudioLoadError": false
@@ -519,7 +520,8 @@ $.extend({ alert: function (message, title) {
           "SupervisorContact": "",
           "RandomizeTestOrder": false,
           "MaxTestsPerRun": -1,
-          "AudioRoot": ""
+          "AudioRoot": "",
+          "RequireComment": false,
         }
       
         for (var property in defaults) {
@@ -578,6 +580,7 @@ $.extend({ alert: function (message, title) {
         }
 
         this.TestState.Ratings = Array(this.TestConfig.Testsets.length);
+        this.TestState.Comments = Array(this.TestConfig.Testsets.length);
         this.TestState.Runtime = new Uint32Array(this.TestConfig.Testsets.length);
 //        this.TestState.Runtime.forEach(function(element, index, array){array[index] = 0});
         this.TestState.startTime = 0;
@@ -1611,6 +1614,9 @@ PrefTest.prototype.createTestDOM = function (TestIdx) {
         if ($('#TableContainer > table')) {
             $('#TableContainer > table').remove();
         }
+        if ($('#TableContainer > #commentBox')) {
+            $('#TableContainer > #commentBox').remove();
+        }
 
         // create new test table
         var tab = document.createElement('table');
@@ -1659,14 +1665,26 @@ PrefTest.prototype.createTestDOM = function (TestIdx) {
         cell[1].innerHTML = "<input type='radio' name='ItemSelection' id='selectB'/>";  
         cell[2] = row[1].insertCell(-1);
         cell[3] = row[1].insertCell(-1);
-        cell[3].innerHTML = "Please select the item which you prefer!";
+        cell[3].innerHTML = "Please select the item which sounds more natural." +
+          "<br/>If you aren't sure, leave it empty.";
        
-        // add spacing
-        row = tab.insertRow(-1);
-        row.setAttribute("height","5");  
+        if (! this.TestConfig.RequireComment) {
+            // add spacing
+            row = tab.insertRow(-1);
+            row.setAttribute("height","5");  
+        }
 
         // append the created table to the DOM
-        $('#TableContainer').append(tab);	
+        $('#TableContainer').append(tab);
+
+        if (this.TestConfig.RequireComment) {
+            var inputDiv = document.createElement('div');
+            inputDiv.setAttribute('id', 'commentBox');
+            inputDiv.setAttribute('style', 'padding: 1em; text-align: left;');
+            inputDiv.innerHTML = "<p>In simple words, tell us why you think the selected item sounds more natural.</p>" +
+            "<textarea id='rateComment' cols='80' rows='2'/>";
+            $('#TableContainer').append(inputDiv);
+        }
 
         // randomly preselect one radio button
         if (typeof this.TestState.Ratings[TestIdx] == 'undefined') {
@@ -1687,14 +1705,29 @@ PrefTest.prototype.readRatings = function (TestIdx) {
         $("#selectB").prop("checked", true);
     }
 
+    if (this.TestConfig.RequireComment) {
+        $("#rateComment").val(this.TestState.Comments[TestIdx]);
+    }
 }
 
 PrefTest.prototype.saveRatings = function (TestIdx) {
 
+    var anyChecked = false;
+
     if ($("#selectA").prop("checked")) {
         this.TestState.Ratings[TestIdx] = "A";
+        anyChecked = true;
     } else if ($("#selectB").prop("checked")) {
         this.TestState.Ratings[TestIdx] = "B";
+        anyChecked = true;
+    }
+    
+    if (this.TestConfig.RequireComment) {
+        this.TestState.Comments[TestIdx] = $("#rateComment").val();
+        if ($("#rateComment").val() == "" && anyChecked) {
+            alert("Please enter your comment.");
+            return false;
+        }
     }
 }
 
@@ -1708,6 +1741,9 @@ PrefTest.prototype.formatResults = function () {
     cell = row.insertCell(-1);     cell.innerHTML = "presented order";
     cell = row.insertCell(-1);     cell.innerHTML = "time in ms";
     cell = row.insertCell(-1);     cell.innerHTML = "chosen preference";
+    if (this.TestConfig.RequireComment) {
+        cell = row.insertCell(-1);     cell.innerHTML = "comment";
+    }
 
     var numCorrect = 0;
     var numWrong   = 0;
@@ -1729,8 +1765,20 @@ PrefTest.prototype.formatResults = function () {
             this.TestState.EvalResults[eval_i].Runtime   = this.TestState.Runtime[i];
             cell.innerHTML = this.TestState.EvalResults[eval_i].Runtime; 
             cell = row.insertCell(-1);
-            this.TestState.EvalResults[eval_i].Preference = this.TestState.Ratings[i];
+
+            if (this.TestState.Ratings[i] == "A") {
+                this.TestState.EvalResults[eval_i].Preference = this.TestState.FileMappings[i].A;
+            } else
+            if (this.TestState.Ratings[i] == "B") {
+                this.TestState.EvalResults[eval_i].Preference = this.TestState.FileMappings[i].B;
+            }
             cell.innerHTML = this.TestState.EvalResults[eval_i].Preference;
+
+            if (this.TestConfig.RequireComment) {
+                cell = row.insertCell(-1);
+                this.TestState.EvalResults[eval_i].Comment = this.TestState.Comments[i];
+                cell.innerHTML = this.TestState.EvalResults[eval_i].Comment;
+            }
 
             eval_i++;
         }
