@@ -566,7 +566,9 @@ $.extend({ alert: function (message, title) {
                 var step = this.TestConfig.Testsets.length / this.TestConfig.MaxTestsPerRun;
                 this.TestState.TestSequence = Array();
                 for (var i = 0; i < this.TestConfig.MaxTestsPerRun; i++){
-                    this.TestState.TestSequence[i] = getRandomInt(i * step, Math.min((i+1) * step, this.TestConfig.Testsets.length));
+                    var index_from = Math.floor(i * step);
+                    var index_to = Math.floor(Math.min((i+1) * step, this.TestConfig.Testsets.length));
+                    this.TestState.TestSequence[i] = getRandomInt(index_from, index_to);
                 }
             }
             this.TestState.TestSequence = shuffleArray(this.TestState.TestSequence);
