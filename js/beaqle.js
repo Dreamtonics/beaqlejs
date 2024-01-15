@@ -1681,8 +1681,8 @@ PrefTest.prototype.createTestDOM = function (TestIdx) {
             var inputDiv = document.createElement('div');
             inputDiv.setAttribute('id', 'commentBox');
             inputDiv.setAttribute('style', 'padding: 1em; text-align: left;');
-            inputDiv.innerHTML = "<p>In simple words, tell us why you think the selected item sounds more natural.</p>" +
-            "<textarea id='rateComment' cols='80' rows='2'/>";
+            inputDiv.innerHTML = "<p>Describe what aspect of the sound makes the selected item sound more natural.</p>" +
+              "<textarea id='rateComment' cols='80' rows='2'/>";
             $('#TableContainer').append(inputDiv);
         }
 
